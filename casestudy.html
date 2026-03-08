@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Product Demo Experience — Sakshi Sharma</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f0e8;
+    --accent: #c84b2f;
+    --muted: #8a8580;
+    --warm-mid: #e8e0d0;
+    --highlight: #f0c040;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000; opacity: 0.4;
+  }
+
+  /* ── PROGRESS BAR ── */
+  #progress {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: var(--accent); width: 0%; z-index: 999;
+    transition: width 0.1s linear;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex; justify-content: space-between; align-items: center;
+    mix-blend-mode: multiply;
+  }
+  .nav-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .nav-back {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent);
+    text-decoration: none; opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .nav-back:hover { opacity: 1; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    padding: 12rem 4rem 6rem 6rem;
+    display: flex; flex-direction: column; justify-content: center;
+    position: relative;
+  }
+
+  .hero-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 2rem;
+    opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 5vw, 5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 1rem;
+    opacity: 0; animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem; color: var(--muted);
+    max-width: 420px;
+    margin-bottom: 3rem;
+    opacity: 0; animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .hero-meta {
+    display: flex; gap: 3rem;
+    opacity: 0; animation: fadeUp 0.8s 0.8s forwards;
+  }
+  .meta-item label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--muted);
+    display: block; margin-bottom: 0.3rem;
+  }
+  .meta-item span {
+    font-size: 0.9rem; font-weight: 500;
+  }
+
+  .hero-right {
+    background: var(--ink);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .hero-right::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 40%, #2a1a0e 0%, #0f0e0c 70%);
+  }
+
+  .hero-image-container {
+    position: relative; z-index: 2;
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3rem;
+  }
+
+  .hero-image-container img {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    border-radius: 4px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    opacity: 0;
+    animation: fadeIn 1s 0.8s forwards;
+  }
+
+  .hero-stat-grid {
+    position: relative; z-index: 2;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+    width: 100%;
+  }
+
+  .stat-cell {
+    padding: 3rem 2.5rem;
+    border: 1px solid rgba(255,255,255,0.06);
+    opacity: 0; animation: fadeIn 1s forwards;
+  }
+  .stat-cell:nth-child(1) { animation-delay: 0.5s; }
+  .stat-cell:nth-child(2) { animation-delay: 0.7s; }
+  .stat-cell:nth-child(3) { animation-delay: 0.9s; }
+  .stat-cell:nth-child(4) { animation-delay: 1.1s; }
+
+  .stat-cell.accent-cell { background: var(--accent); }
+
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem; font-weight: 900;
+    color: #fff; line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .stat-cell.accent-cell .stat-number { color: #fff; }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+  .stat-cell.accent-cell .stat-label { color: rgba(255,255,255,0.8); }
+
+  /* ── DIVIDER ── */
+  .ruled-divider {
+    display: flex; align-items: center; gap: 2rem;
+    margin: 0 6rem;
+  }
+  .ruled-divider::before, .ruled-divider::after {
+    content: ''; flex: 1;
+    height: 1px; background: var(--ink); opacity: 0.15;
+  }
+  .ruled-divider span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 7rem 6rem;
+    max-width: 1400px; margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 1.5rem;
+  }
+
+  .section-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; line-height: 1.2;
+    margin-bottom: 2rem;
+  }
+
+  .section-body {
+    font-size: 1.05rem; color: #3a3632;
+    max-width: 700px; line-height: 1.9;
+  }
+
+  /* ── QUOTE BLOCK ── */
+  .quote-block {
+    background: var(--ink);
+    padding: 3.5rem 4rem;
+    margin: 3rem 0;
+    position: relative;
+  }
+  .quote-block::before {
+    content: '"';
+    position: absolute; top: 1.5rem; left: 2rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 8rem; font-weight: 900;
+    color: rgba(255,255,255,0.05);
+    line-height: 1;
+  }
+  .quote-block q {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem; font-weight: 700;
+    font-style: italic;
+    color: var(--paper);
+    position: relative; z-index: 1;
+    display: block;
+    quotes: none;
+  }
+
+  /* ── CHALLENGE GRID ── */
+  .pain-list {
+    list-style: none;
+    display: grid; gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  .pain-list li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    padding: 2rem;
+    background: rgba(255,255,255,0.4);
+    border-left: 3px solid var(--accent);
+  }
+  .pain-icon {
+    font-size: 2rem;
+    line-height: 1;
+  }
+  .pain-text strong {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .pain-text span {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  /* ── PROCESS GRID ── */
+  .process-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+  .process-card {
+    background: rgba(255,255,255,0.4);
+    padding: 2.5rem;
+    border-top: 3px solid var(--accent);
+    position: relative;
+  }
+  .process-card::before {
+    content: attr(data-num);
+    position: absolute;
+    top: -1rem; right: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem; font-weight: 900;
+    color: rgba(15,14,12,0.04);
+  }
+  .process-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .process-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  .process-desc {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── APPROACH SECTION ── */
+  .approach-list {
+    list-style: none;
+    display: grid; gap: 1.2rem;
+    margin-top: 2rem;
+  }
+  .approach-list li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+  .approach-marker {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    font-weight: 500;
+    padding-top: 0.2rem;
+  }
+  .approach-list li span {
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+
+  /* ── SOLUTION SPLIT ── */
+  .solution-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-top: 3rem;
+  }
+  .solution-visual {
+    background: var(--ink);
+    padding: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .flow-diagram {
+    width: 100%;
+  }
+  .flow-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.4);
+    margin-bottom: 2rem;
+  }
+  .flow-node {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 1.2rem 1.5rem;
+    color: var(--paper);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  .flow-node.active {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .flow-node.deflected {
+    background: rgba(48,200,100,0.2);
+    border-color: rgba(48,200,100,0.4);
+  }
+  .flow-arrow {
+    width: 2px;
+    height: 1.5rem;
+    background: rgba(255,255,255,0.2);
+    margin: 0 auto;
+  }
+  .solution-points {
+    list-style: none;
+    display: grid; gap: 2rem;
+  }
+  .solution-point {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.5rem;
+  }
+  .point-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--accent);
+  }
+  .point-content strong {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .point-content span {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── IMPACT SECTION ── */
+  .impact-section {
+    background: var(--warm-mid);
+    padding: 7rem 0;
+  }
+  .impact-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 6rem;
+  }
+  .impact-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 3rem;
+    margin-top: 3rem;
+  }
+  .impact-item {
+    text-align: center;
+  }
+  .impact-big {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem; font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+  .impact-desc {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── LEARNINGS GRID ── */
+  .learnings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+  .learning-card {
+    background: rgba(255,255,255,0.4);
+    padding: 2.5rem;
+    position: relative;
+  }
+  .learning-card::before {
+    content: attr(data-num);
+    position: absolute;
+    top: 1.5rem; right: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem; font-weight: 900;
+    color: rgba(15,14,12,0.04);
+  }
+  .learning-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 1rem;
+  }
+  .learning-body {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 5rem 6rem 3rem;
+    display: flex; justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(15,14,12,0.1);
+    position: relative;
+  }
+  .footer-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .footer-links {
+    display: flex; gap: 2rem;
+  }
+  .footer-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    text-decoration: none;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  .footer-links a:hover { opacity: 1; }
+  .footer-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-left { padding: 8rem 3rem 4rem; }
+    .hero-right { min-height: 400px; }
+    .solution-split { grid-template-columns: 1fr; }
+    .section { padding: 5rem 3rem; }
+    .ruled-divider { margin: 0 3rem; }
+    footer { padding: 4rem 3rem 2rem; }
+  }
+
+  @media (max-width: 640px) {
+    nav { padding: 1rem 1.5rem; }
+    .hero-left { padding: 6rem 1.5rem 3rem; }
+    .section { padding: 4rem 1.5rem; }
+    .ruled-divider { margin: 0 1.5rem; }
+    .process-grid { grid-template-columns: 1fr; }
+    .learnings-grid { grid-template-columns: 1fr; }
+    .impact-row { grid-template-columns: 1fr; }
+    footer { padding: 3rem 1.5rem 2rem; flex-direction: column; gap: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav>
+  <div class="nav-name">Sakshi Sharma</div>
+  <a href="#" class="nav-back">← Back to Projects</a>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-tag">Case Study — Keka HRTech</div>
+    <h1 class="hero-title">Increasing Top-of-Funnel with <em>High-Intent</em> Product Demo Experiences</h1>
+    <p class="hero-subtitle">How service design thinking transformed lead quality and sales efficiency at a fast-growing SaaS platform.</p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <label>Role</label>
+        <span>Service Design & Growth Strategy</span>
+      </div>
+      <div class="meta-item">
+        <label>Company</label>
+        <span>Keka (HRTech SaaS)</span>
+      </div>
+      <div class="meta-item">
+        <label>Check out the experience</label>
+        <span><a href="https://www.keka.com/product-demos" target="_blank" rel="noopener noreferrer">keka.com/product-demos</a></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-image-container">
+    </div>
+  </div>
+</section>
+
+<div class="ruled-divider"><span>The Context</span></div>
+
+<!-- ── PROBLEM ── -->
+<section class="section reveal">
+  <p class="section-label">01 — The Problem</p>
+  <h2 class="section-heading">Marketing Acquisition vs. Meaningful Discovery</h2>
+  <p class="section-body">At Keka, a fast-growing HRTech SaaS platform, website traffic was healthy but a significant portion of leads entering the funnel lacked real product intent. Traditional top-of-funnel experiences created friction while attracting curiosity-driven visitors rather than buyers.</p>
+
+  <div class="quote-block">
+    <q>How might we allow potential customers to experience the product earlier in the journey while improving lead quality?</q>
+  </div>
+
+  <div style="max-width: 700px; margin-top: 2rem;">
+    <p class="section-body">Sales teams were spending time qualifying leads with little understanding of the product. This created a gap between marketing acquisition and meaningful product discovery.</p>
+  </div>
+
+  <ul class="pain-list">
+    <li>
+      <span class="pain-icon">📊</span>
+      <div class="pain-text">
+        <strong>High Volume, Low Intent Leads</strong>
+        <span>Many leads filled demo forms without understanding the product or having genuine purchase intent.</span>
+      </div>
+    </li>
+    <li>
+      <span class="pain-icon">⏱</span>
+      <div class="pain-text">
+        <strong>Sales Bottleneck</strong>
+        <span>Teams spent significant time explaining basic workflows before real qualification could begin.</span>
+      </div>
+    </li>
+    <li>
+      <span class="pain-icon">🔒</span>
+      <div class="pain-text">
+        <strong>Limited Product Exposure</strong>
+        <span>The website described features but didn't allow users to experience the product value firsthand.</span>
+      </div>
+    </li>
+    <li>
+      <span class="pain-icon">🚪</span>
+      <div class="pain-text">
+        <strong>Delayed Product Discovery</strong>
+        <span>Users only saw the product after booking a sales demo, evaluating the promise rather than the product itself.</span>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<div class="ruled-divider"><span>The Approach</span></div>
+
+<!-- ── PROCESS ── -->
+<section class="section reveal">
+  <p class="section-label">02 — Strategic Approach</p>
+  <h2 class="section-heading">Service Design Meets Growth Strategy</h2>
+  <p class="section-body">I approached the challenge through the lens of service design and growth strategy, focusing on understanding the complete customer journey and identifying critical friction points.</p>
+
+  <ul class="approach-list">
+    <li>
+      <span class="approach-marker">→</span>
+      <span>Mapping the product discovery journey from awareness to demo request</span>
+    </li>
+    <li>
+      <span class="approach-marker">→</span>
+      <span>Identifying specific points of friction and drop-off in the user flow</span>
+    </li>
+    <li>
+      <span class="approach-marker">→</span>
+      <span>Designing a self-serve product experience layer between marketing and sales</span>
+    </li>
+    <li>
+      <span class="approach-marker">→</span>
+      <span>Ensuring the solution improved both lead quantity and quality simultaneously</span>
+    </li>
+  </ul>
+
+  <div class="process-grid" style="margin-top: 4rem;">
+    <div class="process-card" data-num="01">
+      <div class="process-num">01</div>
+      <div class="process-title">Service Blueprint Mapping</div>
+      <div class="process-desc">Created a comprehensive service blueprint of the lead acquisition flow, mapping frontstage customer experiences and backstage operations.</div>
+    </div>
+    <div class="process-card" data-num="02">
+      <div class="process-num">02</div>
+      <div class="process-title">Critical Insight Discovery</div>
+      <div class="process-desc">Customers were being asked to commit to a sales conversation before they had a chance to meaningfully explore the product.</div>
+    </div>
+    <div class="process-card" data-num="03">
+      <div class="process-num">03</div>
+      <div class="process-title">Solution Design</div>
+      <div class="process-desc">Introduced a low-friction product discovery layer that allowed customers to experience product value before committing.</div>
+    </div>
+  </div>
+</section>
+
+<div class="ruled-divider"><span>The Solution</span></div>
+
+<!-- ── SOLUTION ── -->
+<section class="section reveal">
+  <p class="section-label">03 — Implementation</p>
+  <h2 class="section-heading">Product-Led Discovery Experience</h2>
+
+  <div class="solution-split">
+    <div class="solution-visual">
+      <div class="flow-diagram">
+        <p class="flow-tag">User Journey — Before & After</p>
+        <div class="flow-node">User visits website</div>
+        <div class="flow-arrow"></div>
+        <div class="flow-node active">🎯 Interactive demo experience</div>
+        <div class="flow-arrow"></div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+          <div class="flow-node deflected" style="text-align:center; font-size:0.7rem">✓ High intent lead<br/><span style="color:#30c864; font-size:0.8rem">Qualified</span></div>
+          <div class="flow-node" style="text-align:center; font-size:0.7rem; opacity:0.5">Low intent exit<br/><span style="color:rgba(245,240,232,0.3); font-size:0.8rem">Filtered</span></div>
+        </div>
+        <div style="text-align:center; margin-top:1.5rem;">
+          <span style="font-family:'DM Mono',monospace; font-size:0.65rem; letter-spacing:0.1em; color:var(--accent);">Self-qualification mechanism</span>
+        </div>
+      </div>
+    </div>
+
+    <ul class="solution-points">
+      <li class="solution-point">
+        <span class="point-num">I</span>
+        <div class="point-content">
+          <strong>Interactive Product Demos</strong>
+          <span>Embedded hands-on product experiences directly on the website, allowing users to explore core workflows without sales intervention.</span>
+        </div>
+      </li>
+      <li class="solution-point">
+        <span class="point-num">II</span>
+        <div class="point-content">
+          <strong>Self-Service Discovery Layer</strong>
+          <span>Created a middle ground between static marketing content and scheduled demos, reducing friction while increasing engagement.</span>
+        </div>
+      </li>
+      <li class="solution-point">
+        <span class="point-num">III</span>
+        <div class="point-content">
+          <strong>Natural Filtering Mechanism</strong>
+          <span>Interactive demos acted as self-qualification, filtering low-intent leads while encouraging serious buyers to engage deeper.</span>
+        </div>
+      </li>
+      <li class="solution-point">
+        <span class="point-num">IV</span>
+        <div class="point-content">
+          <strong>Product-Led Growth Foundation</strong>
+          <span>Transformed the website from a marketing information layer into a genuine product discovery platform.</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ── IMPACT ── -->
+<section class="impact-section reveal">
+  <div class="impact-inner">
+    <p class="section-label">04 — Impact</p>
+    <h2 class="section-heading">Results That Moved the Business</h2>
+    <div class="impact-row">
+      <div class="impact-item">
+        <div class="impact-big">↑</div>
+        <div class="impact-desc">Higher intent leads with clearer product understanding and better problem articulation</div>
+      </div>
+      <div class="impact-item">
+        <div class="impact-big">↓</div>
+        <div class="impact-desc">Reduced sales qualification time as conversations shifted to solution discussions</div>
+      </div>
+      <div class="impact-item">
+        <div class="impact-big">✓</div>
+        <div class="impact-desc">Improved conversion quality through natural self-qualification mechanism</div>
+      </div>
+      <div class="impact-item">
+        <div class="impact-big">1×</div>
+        <div class="impact-desc">Reusable framework for product-led growth across the organization</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="ruled-divider"><span>Reflections</span></div>
+
+<!-- ── LEARNINGS ── -->
+<section class="section reveal">
+  <p class="section-label">05 — Key Takeaways</p>
+  <h2 class="section-heading">What This Taught Me</h2>
+
+  <div class="learnings-grid">
+    <div class="learning-card" data-num="1">
+      <div class="learning-title">Product experience beats product description</div>
+      <div class="learning-body">Allowing users to interact with the product earlier in the journey creates more qualified leads than any amount of marketing copy or feature lists.</div>
+    </div>
+    <div class="learning-card" data-num="2">
+      <div class="learning-title">Self-qualification improves both sides</div>
+      <div class="learning-body">When users can assess fit themselves, sales teams get better leads and users get more valuable conversations. It's a win-win through better information flow.</div>
+    </div>
+    <div class="learning-card" data-num="3">
+      <div class="learning-title">Service design reveals hidden friction</div>
+      <div class="learning-body">Mapping the complete journey from awareness to demo revealed that we were asking for commitment before providing value — a fundamental mismatch.</div>
+    </div>
+    <div class="learning-card" data-num="4">
+      <div class="learning-title">Product-led growth starts with access</div>
+      <div class="learning-body">The shift from information-led to product-led discovery wasn't about removing sales — it was about empowering users to make informed decisions earlier.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-name">Sakshi Sharma</div>
+  <div class="footer-links">
+    <a href="https://medium.com/@work.sakshisharma" target="_blank">Medium</a>
+    <a href="#">LinkedIn</a>
+    <a href="#">All Projects</a>
+  </div>
+  <div class="footer-dot"></div>
+</footer>
+
+<script>
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight);
+    document.getElementById('progress').style.width = (scrolled * 100) + '%';
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
